@@ -1,24 +1,28 @@
-name: Update APK from Telegram Bot
+name: Update APK from Telegram
 
 on:
   repository_dispatch:
     types: [update-apk]
 
+permissions:
+  contents: write
+
 jobs:
-  update-apk:
+  update:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
       
-      - name: Download APK from Telegram
+      - name: Download APK
         run: |
-          curl -o MParivahan.apk "${{ github.event.client_payload.apk_url }}"
+          curl -L -o MParivahan.apk "${{ github.event.client_payload.apk_url }}"
       
-      - name: Commit and push APK
+      - name: Commit and push
         run: |
-          git config --global user.name 'MPari Bot'
-          git config --global user.email 'bot@mpari.dev'
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add MParivahan.apk
-          git commit -m "Update APK: ${{ github.event.client_payload.version }}"
+          git diff --staged --quiet || git commit -m "Update APK: ${{ github.event.client_payload.file_name }}"
           git push
